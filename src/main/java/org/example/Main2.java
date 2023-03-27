@@ -1,14 +1,12 @@
 package org.example;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.LockSupport;
 
 public class Main2 {
     private static final int MAX_THREADS = Runtime.getRuntime().availableProcessors();
-    private static final int LENGTH_ARRAY_SIZE = 100;
+    private static final int LENGTH_ARRAY_SIZE = 1000;
 
     public static void main(String[] args) {
         long start = System.nanoTime();
@@ -55,8 +53,11 @@ class PrimeNumberFinder{
             }
            // Thread.yield();
         }
-        System.out.println(numbsArray);
-        System.out.println(numbsArray.size());
+        Arrays.sort(new ArrayList[]{numbsArray});
+        Set<Integer> targetSet = new HashSet<Integer>(numbsArray);
+
+        System.out.println(targetSet);
+        System.out.println(targetSet.size());
         System.out.println(initialCapacity);
     }
 
@@ -80,9 +81,9 @@ class PrimeNumberFinder{
             for(int i = startSegment; i <= endSegment; i++){
                 if(isPrime(i)){
                     // todo добавлять чилсо в конечный массив
-                    synchronized (numbsArray) {
+                  //  synchronized (numbsArray) {
                         numbsArray.add(i);
-                    }
+                //    }
                    // numbsArray.add(i);
                 }
             }
