@@ -1,91 +1,47 @@
 package org.example;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class Main {
+
     public static void main(String[] args) {
-        long start = System.nanoTime();
-        Finder primeNumberFinder = new Finder(214748364, 20);
+        // определяем количество доступных ядер процессора
+        int numThreads = Runtime.getRuntime().availableProcessors();
+        // создаем исполнительный сервис с фиксированным количеством потоков
+        ExecutorService executor = Executors.newFixedThreadPool(numThreads);
+        // создаем потокобезопасную очередь для хранения простых чисел
+        ConcurrentLinkedQueue<Integer> primes = new ConcurrentLinkedQueue<>();
+        // используем AtomicInteger для потокобезопасного подсчета количества найденных простых чисел
+        AtomicInteger primeCount = new AtomicInteger(0);
+        int currentNumber = 0;
+
+        // генерация 100 простых чисел
+        while (primeCount.get() < 100) {
+            currentNumber++;
+            // создаем новую задачу и добавляем ее в очередь исполнения
+            executor.execute(new PrimeChecker(currentNumber, primes, primeCount));
+        }
+
+        // завершаем работу исполнительного сервиса
+        executor.shutdown();
+
         try {
-            System.out.println(Arrays.toString(primeNumberFinder.findPrimes().toArray()));
-         //   System.out.println(Arrays.toString(primeNumberFinder.findPrimes().toArray()).length());
+            // ожидание завершения выполнения всех задач
+            executor.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS);
         } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        }
-        System.out.println(System.nanoTime() - start);
-    }
-}
-
-
-class Finder {
-    private final int maxNumber;
-    private final int numThreads;
-    private final boolean[] primes;
-
-    public Finder(int maxNumber, int numThreads) {
-        this.maxNumber = maxNumber;
-        this.numThreads = numThreads;
-        primes = new boolean[maxNumber + 1];
-    }
-
-    public List<Integer> findPrimes() throws InterruptedException {
-        List<Thread> threads = new ArrayList<>();
-        int segmentSize = (maxNumber - 1) / numThreads + 1;
-        for (int i = 0; i < numThreads; i++) {
-            int start = i * segmentSize + 2;
-            int end = Math.min(start + segmentSize - 1, maxNumber);
-            threads.add(new PrimeFinderThread(start, end));
+            e.printStackTrace();
         }
 
-        for (Thread thread : threads) {
-            thread.start();
-        }
-
-        for (Thread thread : threads) {
-            thread.join();
-        }
-
-        List<Integer> result = new ArrayList<>();
-        for (int i = 2; i <= maxNumber; i++) {
-            if (primes[i]) {
-                result.add(i);
-            }
-        }
-        return result;
-    }
-
-    private class PrimeFinderThread extends Thread {
-        private final int start;
-        private final int end;
-
-        public PrimeFinderThread(int start, int end) {
-            this.start = start;
-            this.end = end;
-        }
-
-        @Override
-        public void run() {
-            for (int i = start; i <= end; i++) {
-                if (isPrime(i)) {
-                    primes[i] = true;
-                }
-            }
-        }
-
-        private boolean isPrime(int number) {
-            if (number < 2) {
-                return false;
-            }
-
-            for (int i = 2; i * i <= number; i++) {
-                if (number % i == 0) {
-                    return false;
-                }
-            }
-
-            return true;
+        // выводим первые 100 найденных простых чисел
+        System.out.println("Первые 100 простых чисел:");
+        for (int i = 0; i < 100; i++) {
+            System.out.print(primes.poll() + " ");
         }
     }
+
+
 }
