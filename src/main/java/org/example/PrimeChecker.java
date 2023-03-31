@@ -9,10 +9,10 @@ import java.util.concurrent.atomic.AtomicInteger;
 class PrimeChecker implements Runnable {
 
     private final int number;
-    private final ConcurrentLinkedQueue<Integer> primes;
+    private final ConcurrentSkipListSet<Integer> primes;
     private final AtomicInteger primeCount;
 
-    public PrimeChecker(int number, ConcurrentLinkedQueue<Integer> primes, AtomicInteger primeCount) {
+    public PrimeChecker(int number, ConcurrentSkipListSet<Integer> primes, AtomicInteger primeCount) {
         this.number = number;
         this.primes = primes;
         this.primeCount = primeCount;

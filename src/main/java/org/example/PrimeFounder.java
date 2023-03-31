@@ -1,27 +1,40 @@
 package org.example;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class PrimeFounder {
 
-
-
-    public void startFoundPrime(int numberOfNumbers,  int numThreads) {
-        foundPrime ( numberOfNumbers,   numThreads);
+    public int startFoundPrime(int numberOfNumbers,  int numThreads) {
+        ConcurrentSkipListSet <Integer> primes = foundPrime ( numberOfNumbers,   numThreads);
+        return printPrimeNumbers( numberOfNumbers,  primes);
     }
 
-    public void startFoundPrime(int numberOfNumbers) {
-       /// this.numberOfNumbers = numberOfNumbers;
+    public int startFoundPrime(int numberOfNumbers) {
         // определяем количество доступных ядер процессора
         int numThreads = Runtime.getRuntime().availableProcessors();
-        foundPrime ( numberOfNumbers,   numThreads);
+        ConcurrentSkipListSet <Integer> primes = foundPrime ( numberOfNumbers,   numThreads);
+        //printPrimeNumbers( numberOfNumbers,  primes);
+        return printPrimeNumbers( numberOfNumbers,  primes);
     }
 
-    private void foundPrime (int numberOfNumbers,  int numThreads){
+    private int printPrimeNumbers(int numberOfNumbers, ConcurrentSkipListSet <Integer> primes){
+        int lastNum = 0;
+        List<Integer> sortedPrimes = new ArrayList<>(primes);
+        for (int i = 0; i < numberOfNumbers; i++) {
+            lastNum = sortedPrimes.get(i);
+            System.out.print(lastNum + " ");
+        }
+        System.out.println();
+        return lastNum;
+    }
+
+    private ConcurrentSkipListSet <Integer> foundPrime(int numberOfNumbers,  int numThreads){
         long m = System.currentTimeMillis();
         // создаем потокобезопасную очередь для хранения простых чисел
-        ConcurrentLinkedQueue <Integer> primes = new ConcurrentLinkedQueue <>();
+        ConcurrentSkipListSet <Integer> primes = new ConcurrentSkipListSet <>();
         // используем AtomicInteger для потокобезопасного подсчета количества найденных простых чисел
          AtomicInteger primeCount = new AtomicInteger(0);
         AtomicInteger primeMax = new AtomicInteger(numberOfNumbers);
@@ -37,28 +50,15 @@ public class PrimeFounder {
             }
         }
 
-
-
         try {
             // ожидание завершения выполнения всех задач
-            executor.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS);
+            if (!executor.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS)){
+                System.out.println("Failed to terminate executor");
+            }
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-
-        // выводим первые 100 найденных простых чисел
-       // System.out.println("Первые 100 простых чисел:");
-        for (int i = 0; i < primeCount.get(); i++) {
-            System.out.print(primes.poll() + " ");
-        }
-        System.out.println();
-      //  System.out.println(" primes.size()" + primes.toArray().length);
-        System.out.println(" Length of queue: " + primeCount.get() + " Thread num " + numThreads);
-      //  System.out.println(" primeMax.get()" + primeMax.get());
         System.out.println("Time working "+(double) (System.currentTimeMillis() - m));
-        System.out.println("------------------------------------------");
+        return primes;
     }
-
-
-
 }
