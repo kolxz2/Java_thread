@@ -2,6 +2,7 @@ package org.example;
 
 import org.junit.Test;
 
+import java.util.*;
 import java.util.concurrent.ArrayBlockingQueue;
 
 import static org.junit.Assert.*;
@@ -27,8 +28,12 @@ public class PrimeFounderTest {
             assertEquals(expectedSize, primes.size());
             // Проверяем, что последнее простое число равно ожидаемому
             assertEquals(expectedLastPrime, lastPrime);
-
-
+            List<Integer> sortedPrimes = new ArrayList<>(primes);
+            Collections.sort(sortedPrimes);
+            for (int j = 0; j < expectedSize; j++) {
+                System.out.print(sortedPrimes.get(j) + " ");
+            }
+            System.out.println();
         }
     }
 }

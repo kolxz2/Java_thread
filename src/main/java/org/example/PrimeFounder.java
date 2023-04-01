@@ -16,7 +16,6 @@ public class PrimeFounder {
         // определяем количество доступных ядер процессора
         int numThreads = Runtime.getRuntime().availableProcessors();
         ArrayBlockingQueue <Integer> primes = foundPrime ( numberOfNumbers,   numThreads);
-        //printPrimeNumbers( numberOfNumbers,  primes);
         printPrimeNumbers( numberOfNumbers,  primes);
     }
 
