@@ -1,18 +1,16 @@
 package org.example;
 
-/*import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.concurrent.ConcurrentSkipListSet;*/
+
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
 class PrimeChecker implements Runnable {
 
     private final int number;
-    private final ConcurrentSkipListSet<Integer> primes;
+    private final ArrayBlockingQueue<Integer> primes;
     private final AtomicInteger primeCount;
 
-    public PrimeChecker(int number, ConcurrentSkipListSet<Integer> primes, AtomicInteger primeCount) {
+    public PrimeChecker(int number, ArrayBlockingQueue<Integer> primes, AtomicInteger primeCount) {
         this.number = number;
         this.primes = primes;
         this.primeCount = primeCount;
@@ -22,10 +20,17 @@ class PrimeChecker implements Runnable {
     public void run() {
         // если число простое то добаляем его в очередь простых
         // чисел и инкрементируем счётчик чисел
-        if (isPrime(number)) {
-            primes.add(number);
-            primeCount.incrementAndGet();
+        try{
+            if (isPrime(number)) {
+                primes.add(number);
+                primeCount.incrementAndGet();
+            }
+        } catch (Exception e){
+            Thread.currentThread().interrupt();
         }
+
+
+
     }
 
     private boolean isPrime(int n) {

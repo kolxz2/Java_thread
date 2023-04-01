@@ -7,34 +7,32 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 public class PrimeFounder {
 
-    public int startFoundPrime(int numberOfNumbers,  int numThreads) {
-        ConcurrentSkipListSet <Integer> primes = foundPrime ( numberOfNumbers,   numThreads);
-        return printPrimeNumbers( numberOfNumbers,  primes);
+    public void startFoundPrime(int numberOfNumbers,  int numThreads) {
+        ArrayBlockingQueue <Integer> primes = foundPrime ( numberOfNumbers,   numThreads);
+        printPrimeNumbers( numberOfNumbers,  primes);
     }
 
-    public int startFoundPrime(int numberOfNumbers) {
+    public void startFoundPrime(int numberOfNumbers) {
         // определяем количество доступных ядер процессора
         int numThreads = Runtime.getRuntime().availableProcessors();
-        ConcurrentSkipListSet <Integer> primes = foundPrime ( numberOfNumbers,   numThreads);
+        ArrayBlockingQueue <Integer> primes = foundPrime ( numberOfNumbers,   numThreads);
         //printPrimeNumbers( numberOfNumbers,  primes);
-        return printPrimeNumbers( numberOfNumbers,  primes);
+        printPrimeNumbers( numberOfNumbers,  primes);
     }
 
-    private int printPrimeNumbers(int numberOfNumbers, ConcurrentSkipListSet <Integer> primes){
-        int lastNum = 0;
+    private void printPrimeNumbers(int numberOfNumbers, ArrayBlockingQueue <Integer> primes){
         List<Integer> sortedPrimes = new ArrayList<>(primes);
         for (int i = 0; i < numberOfNumbers; i++) {
-            lastNum = sortedPrimes.get(i);
-            System.out.print(lastNum + " ");
+            System.out.print(sortedPrimes.get(i) + " ");
         }
         System.out.println();
-        return lastNum;
+
     }
 
-    private ConcurrentSkipListSet <Integer> foundPrime(int numberOfNumbers,  int numThreads){
-        long m = System.currentTimeMillis();
+    static ArrayBlockingQueue <Integer> foundPrime(int numberOfNumbers, int numThreads){
+
         // создаем потокобезопасную очередь для хранения простых чисел
-        ConcurrentSkipListSet <Integer> primes = new ConcurrentSkipListSet <>();
+        ArrayBlockingQueue <Integer> primes = new ArrayBlockingQueue<>(numberOfNumbers);
         // используем AtomicInteger для потокобезопасного подсчета количества найденных простых чисел
          AtomicInteger primeCount = new AtomicInteger(0);
         AtomicInteger primeMax = new AtomicInteger(numberOfNumbers);
@@ -48,7 +46,9 @@ public class PrimeFounder {
                 // завершаем работу исполнительного сервиса
                 executor.shutdownNow();
             }
+
         }
+        executor.shutdownNow();
 
         try {
             // ожидание завершения выполнения всех задач
@@ -58,7 +58,7 @@ public class PrimeFounder {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-        System.out.println("Time working "+(double) (System.currentTimeMillis() - m));
+        System.out.println("Queue size "+ primes.size());
         return primes;
     }
 }

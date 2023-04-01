@@ -2,38 +2,33 @@ package org.example;
 
 import org.junit.Test;
 
+import java.util.concurrent.ArrayBlockingQueue;
+
 import static org.junit.Assert.*;
+
 public class PrimeFounderTest {
 
-    @Test
-    public void startFoundPrime100() {
-        PrimeFounder primeFounder = new PrimeFounder();
-        assertEquals(541, primeFounder.startFoundPrime(100));
-    }
+
+    private static final int numThreads = 10;
 
     @Test
-    public void startFoundPrime1000() {
-        PrimeFounder primeFounder = new PrimeFounder();
-        assertEquals(7919, primeFounder.startFoundPrime(1000));
-    }
-    @Test
-    public void startFoundPrime10000() {
-        PrimeFounder primeFounder = new PrimeFounder();
-        assertEquals(104729, primeFounder.startFoundPrime(10000));
-    }
-    @Test
-    public void startFoundThread10Prime100() {
-        PrimeFounder primeFounder = new PrimeFounder();
-        assertEquals(541, primeFounder.startFoundPrime(100, 10));
-    }@Test
-    public void startFoundThread10Prime1000() {
-        PrimeFounder primeFounder = new PrimeFounder();
-        assertEquals(7919, primeFounder.startFoundPrime(1000, 10));
-    }@Test
-    public void startFoundThread10Prime10000() {
-        PrimeFounder primeFounder = new PrimeFounder();
-        assertEquals(104729, primeFounder.startFoundPrime(10000, 10));
-    }
+    public void testPrimeSearch() {
+        int[] expectedLastPrimes = {541, 3571, 7919, 104729};//ожидаемые значения последнего числа
+        int[] expectedSizes = {100, 500, 1000, 10000}; // max кол-во чисел к выводу
+        for (int i = 0; i < expectedLastPrimes.length; i++) {
+            int expectedLastPrime = expectedLastPrimes[i];
+            int expectedSize = expectedSizes[i];
+            ArrayBlockingQueue<Integer> primes;
+            primes = PrimeFounder.foundPrime(expectedSize, numThreads);
+            // Получаем последнее простое число
+            Integer[] primeArray = primes.toArray(new Integer[0]);
+            int lastPrime = primeArray[primeArray.length - 1];
+            // Проверяем, что количество простых чисел равно ожидаемому
+            assertEquals(expectedSize, primes.size());
+            // Проверяем, что последнее простое число равно ожидаемому
+            assertEquals(expectedLastPrime, lastPrime);
 
 
+        }
+    }
 }
